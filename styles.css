@@ -5,7 +5,8 @@
   --text: #f2f2f7;
   --muted: rgba(242, 242, 247, 0.7);
   --border: rgba(242, 242, 247, 0.12);
-  --accent: #c8a06a;
+  --accent: #6366f1;
+  --accentRgb: 99, 102, 241;
   --danger: #ef4444;
   --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
   --radius: 16px;
@@ -14,6 +15,10 @@
 
 * {
   box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 html,
@@ -25,7 +30,7 @@ body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
     "Segoe UI Emoji";
-  background: radial-gradient(1200px 600px at 20% 0%, rgba(200, 160, 106, 0.12), transparent 60%),
+  background: radial-gradient(1200px 600px at 20% 0%, rgba(var(--accentRgb), 0.12), transparent 60%),
     radial-gradient(900px 500px at 90% 10%, rgba(99, 102, 241, 0.1), transparent 50%), var(--bg);
   color: var(--text);
 }
@@ -58,6 +63,11 @@ body {
   gap: 10px;
 }
 
+.topbar__actions .btn[aria-current="true"] {
+  border-color: rgba(var(--accentRgb), 0.9);
+  background: linear-gradient(180deg, rgba(var(--accentRgb), 0.35), rgba(var(--accentRgb), 0.18));
+}
+
 .main {
   padding: 18px;
   max-width: 1100px;
@@ -78,8 +88,10 @@ body {
   padding: 16px;
 }
 
-.panel + .panel {
-  margin-top: 16px;
+@media (max-width: 768px) {
+  .panel + .panel {
+    margin-top: 12px;
+  }
 }
 
 .panel__header {
@@ -191,8 +203,8 @@ body {
 
 .btn {
   appearance: none;
-  border: 1px solid rgba(200, 160, 106, 0.6);
-  background: linear-gradient(180deg, rgba(200, 160, 106, 0.25), rgba(200, 160, 106, 0.12));
+  border: 1px solid rgba(var(--accentRgb), 0.6);
+  background: linear-gradient(180deg, rgba(var(--accentRgb), 0.25), rgba(var(--accentRgb), 0.12));
   color: var(--text);
   border-radius: 999px;
   padding: 9px 12px;
@@ -201,7 +213,7 @@ body {
 }
 
 .btn:hover {
-  border-color: rgba(200, 160, 106, 0.9);
+  border-color: rgba(var(--accentRgb), 0.9);
 }
 
 .btn:disabled {
@@ -249,6 +261,99 @@ body {
   padding: 10px 12px;
 }
 
+.fileInput {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.fileInput__native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.fileInput__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.fileInput__btn:hover {
+  border-color: rgba(var(--accentRgb), 0.6);
+}
+
+.fileInput__name {
+  color: var(--muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.stars {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.star {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(242, 242, 247, 0.35);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.star:hover {
+  border-color: rgba(var(--accentRgb), 0.6);
+  color: rgba(242, 242, 247, 0.7);
+}
+
+.star.isOn {
+  border-color: rgba(var(--accentRgb), 0.9);
+  color: rgba(var(--accentRgb), 1);
+  background: rgba(var(--accentRgb), 0.12);
+}
+
+.stars--small {
+  gap: 6px;
+  padding: 0;
+}
+
+.star--small {
+  border-radius: 10px;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(242, 242, 247, 0.35);
+}
+
 .dialog::backdrop {
   background: rgba(0, 0, 0, 0.65);
 }
@@ -287,30 +392,60 @@ body {
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-top: 12px;
 }
 
-@media (max-width: 700px) {
-  .gallery {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.gallery__label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
 }
 
-.gallery__item {
+.gallery__active {
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.2);
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 16 / 10;
 }
 
-.gallery__item img {
+.gallery__active img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.gallery__thumbs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gallery__thumb {
+  flex: 0 0 auto;
+  width: 88px;
+  height: 66px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+}
+
+.gallery__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery__thumb[aria-current="true"] {
+  border-color: rgba(var(--accentRgb), 0.9);
 }
 
 .passport {
@@ -349,6 +484,46 @@ body {
   padding: 12px;
   display: grid;
   gap: 6px;
+}
+
+.gm-style,
+.gm-style * {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+
+.gm-style .gm-style-iw,
+.gm-style .gm-style-iw * {
+  color: #111827;
+}
+
+.gm-style .gm-style-iw-c {
+  padding: 14px 16px !important;
+}
+
+.gm-style .gm-style-iw-d {
+  overflow: visible !important;
+}
+
+.iw {
+  display: grid;
+  gap: 4px;
+}
+
+.iw__title {
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.iw__addr {
+  font-size: 14px;
+  line-height: 1.25;
+  color: rgba(17, 24, 39, 0.75);
+}
+
+.gm-style .gm-style-iw a {
+  color: #1d4ed8;
 }
 
 .footer {

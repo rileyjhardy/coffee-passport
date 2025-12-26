@@ -11,13 +11,13 @@
       <header class="topbar">
         <div class="topbar__title">Coffee Passport</div>
         <div class="topbar__actions">
+          <button id="btnFind" class="btn btn--ghost" type="button">Find</button>
           <button id="btnPassport" class="btn btn--ghost" type="button">Passport</button>
-          <button id="btnSettings" class="btn btn--ghost" type="button">Settings</button>
         </div>
       </header>
 
       <main class="main">
-        <section class="section">
+        <section class="section" id="findView">
           <div class="panel__header">
             <div>
               <h1 class="h1">Near you</h1>
@@ -36,9 +36,9 @@
               <div id="map" class="map" aria-label="Map"></div>
             </section>
 
-            <section class="panel" aria-label="Coffee shops">
+            <section class="panel" aria-label="Nearby">
               <div class="panel__header">
-                <h2 class="h2">Coffee shops</h2>
+                <h2 class="h2">Nearby</h2>
               </div>
               <div id="shops" class="list" aria-live="polite"></div>
             </section>
@@ -72,48 +72,29 @@
 
           <div class="field">
             <label class="label" for="rating">Rating</label>
-            <select id="rating" class="input">
-              <option value="">Select…</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
+            <input id="rating" type="hidden" value="" />
+            <div class="stars" role="radiogroup" aria-label="Rating">
+              <button class="star" type="button" data-value="1" aria-label="1 star" aria-checked="false" role="radio">★</button>
+              <button class="star" type="button" data-value="2" aria-label="2 stars" aria-checked="false" role="radio">★</button>
+              <button class="star" type="button" data-value="3" aria-label="3 stars" aria-checked="false" role="radio">★</button>
+              <button class="star" type="button" data-value="4" aria-label="4 stars" aria-checked="false" role="radio">★</button>
+              <button class="star" type="button" data-value="5" aria-label="5 stars" aria-checked="false" role="radio">★</button>
+            </div>
           </div>
 
           <div class="field">
             <label class="label" for="photo">Photo</label>
-            <input id="photo" class="input" type="file" accept="image/*" capture="environment" />
+            <div class="fileInput">
+              <input id="photo" class="fileInput__native" type="file" accept="image/*" capture="environment" />
+              <label class="fileInput__btn" for="photo">Choose photo</label>
+              <div id="photoName" class="fileInput__name">No file selected</div>
+            </div>
             <div id="photoHint" class="muted">Optional. Stored locally.</div>
           </div>
 
           <div class="dialog__actions">
             <button class="btn btn--ghost" value="cancel" type="submit">Cancel</button>
             <button id="btnSaveVisit" class="btn" value="default" type="submit">Save visit</button>
-          </div>
-        </form>
-      </dialog>
-
-      <dialog id="settingsDialog" class="dialog">
-        <form method="dialog" class="dialog__form" id="settingsForm">
-          <div class="dialog__header">
-            <div>
-              <div class="dialog__title">Settings</div>
-              <div class="muted">Google Maps API key is stored only in your browser.</div>
-            </div>
-            <button class="iconBtn" value="cancel" aria-label="Close" type="submit">✕</button>
-          </div>
-
-          <div class="field">
-            <label class="label" for="apiKey">Google Maps API key</label>
-            <input id="apiKey" class="input" type="password" placeholder="Paste your API key" autocomplete="off" />
-            <div class="muted">Needs Maps JavaScript API + Places API enabled for this key.</div>
-          </div>
-
-          <div class="dialog__actions">
-            <button class="btn btn--ghost" value="cancel" type="submit">Cancel</button>
-            <button id="btnSaveKey" class="btn" value="default" type="submit">Save</button>
           </div>
         </form>
       </dialog>
@@ -136,10 +117,6 @@
           </div>
         </form>
       </dialog>
-
-      <footer class="footer">
-        <div class="muted">Local-only. No accounts. No server.</div>
-      </footer>
     </div>
 
     <script src="./app.js"></script>

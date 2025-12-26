@@ -1,5 +1,5 @@
 const STORAGE_KEY = "coffee_passport_v1";
-const KEY_STORAGE = "coffee_passport_gmaps_key";
+const GOOGLE_MAPS_API_KEY = "AIzaSyD5uOJLOyJjCU0hmOhIP08SrBEj7muK7Fc";
 
 function $(id) {
   return document.getElementById(id);
@@ -30,11 +30,7 @@ function saveState(state) {
 }
 
 function getApiKey() {
-  return (localStorage.getItem(KEY_STORAGE) || "").trim();
-}
-
-function setApiKey(key) {
-  localStorage.setItem(KEY_STORAGE, (key || "").trim());
+  return GOOGLE_MAPS_API_KEY;
 }
 
 function fileToDataUrl(file, { maxBytes } = {}) {
@@ -61,6 +57,34 @@ function setLocationStatus(text) {
   $("locationStatus").textContent = text;
 }
 
+function toLatLngLiteral(place) {
+  if (!place) return null;
+
+  if (place._latLng && typeof place._latLng.lat === "number" && typeof place._latLng.lng === "number") {
+    return place._latLng;
+  }
+
+  const loc = place.geometry && place.geometry.location ? place.geometry.location : null;
+  if (loc) {
+    if (typeof loc.lat === "function" && typeof loc.lng === "function") {
+      const lat = loc.lat();
+      const lng = loc.lng();
+      if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+    }
+    if (typeof loc.lat === "number" && typeof loc.lng === "number") {
+      if (Number.isFinite(loc.lat) && Number.isFinite(loc.lng)) return { lat: loc.lat, lng: loc.lng };
+    }
+  }
+
+  if (place.location && typeof place.location.latitude === "number" && typeof place.location.longitude === "number") {
+    const lat = place.location.latitude;
+    const lng = place.location.longitude;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+  }
+
+  return null;
+}
+
 function ensureGmapsLoaded(apiKey) {
   return new Promise((resolve, reject) => {
     if (window.google && window.google.maps) return resolve();
@@ -75,7 +99,7 @@ function ensureGmapsLoaded(apiKey) {
     script.dataset.gmaps = "1";
     script.async = true;
     script.defer = true;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD5uOJLOyJjCU0hmOhIP08SrBEj7muK7Fc`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Failed to load Google Maps."));
     document.head.appendChild(script);
@@ -91,23 +115,37 @@ let pendingVisit = null;
 let placeMarkers = [];
 let pendingShop = null;
 
-function openSettings() {
-  $("apiKey").value = getApiKey();
-  $("settingsDialog").showModal();
-}
-
 function openPassport() {
   $("passportPanel").hidden = false;
   renderPassport();
   window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 }
 
-function togglePassport() {
-  const panel = $("passportPanel");
-  panel.hidden = !panel.hidden;
-  if (!panel.hidden) {
+function setView(view) {
+  const findView = $("findView");
+  const passportPanel = $("passportPanel");
+  const btnFind = $("btnFind");
+  const btnPassport = $("btnPassport");
+
+  const isPassport = view === "passport";
+
+  if (findView) findView.hidden = isPassport;
+  if (passportPanel) passportPanel.hidden = !isPassport;
+
+  if (btnFind) btnFind.setAttribute("aria-current", isPassport ? "false" : "true");
+  if (btnPassport) btnPassport.setAttribute("aria-current", isPassport ? "true" : "false");
+
+  if (isPassport) {
     renderPassport();
-    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (map && window.google && window.google.maps && window.google.maps.event) {
+      setTimeout(() => {
+        window.google.maps.event.trigger(map, "resize");
+        if (currentPosition) map.setCenter(currentPosition);
+      }, 0);
+    }
   }
 }
 
@@ -123,7 +161,7 @@ function placePhotoMediaUrl(photoName, { maxWidthPx = 800, maxHeightPx = 800 } =
 
 async function fetchPlaceDetails(placeId) {
   const apiKey = getApiKey();
-  if (!apiKey) throw new Error("Add your Google Maps API key in Settings.");
+  if (!apiKey) throw new Error("Missing Google Maps API key.");
   if (!placeId) throw new Error("Missing place id.");
 
   const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
@@ -146,36 +184,88 @@ function renderShopGallery({ savedPhotoDataUrl, placePhotos }) {
   const el = $("shopGallery");
   el.innerHTML = "";
 
-  const urls = [];
-  if (savedPhotoDataUrl) urls.push(savedPhotoDataUrl);
+  if (savedPhotoDataUrl) {
+    const label = document.createElement("div");
+    label.className = "gallery__label";
+    label.textContent = "Your visit photo";
 
+    const active = document.createElement("div");
+    active.className = "gallery__active";
+    const img = document.createElement("img");
+    img.alt = "Visit photo";
+    img.loading = "eager";
+    img.src = savedPhotoDataUrl;
+    active.appendChild(img);
+
+    el.appendChild(label);
+    el.appendChild(active);
+  }
+
+  const placeUrls = [];
   if (Array.isArray(placePhotos)) {
     for (const p of placePhotos) {
       if (!p || !p.name) continue;
       const u = placePhotoMediaUrl(p.name, { maxWidthPx: 900, maxHeightPx: 900 });
-      if (u) urls.push(u);
-      if (urls.length >= 6) break;
+      if (u) placeUrls.push(u);
+      if (placeUrls.length >= 6) break;
     }
   }
 
-  if (!urls.length) {
+  const placeLabel = document.createElement("div");
+  placeLabel.className = "gallery__label";
+  placeLabel.textContent = "Coffee shop photos";
+  el.appendChild(placeLabel);
+
+  if (!placeUrls.length) {
     const empty = document.createElement("div");
     empty.className = "muted";
-    empty.textContent = "No photos yet.";
+    empty.textContent = "No coffee shop photos available.";
     el.appendChild(empty);
     return;
   }
 
-  for (const src of urls) {
-    const item = document.createElement("div");
-    item.className = "gallery__item";
+  let activeIndex = 0;
+
+  const active = document.createElement("div");
+  active.className = "gallery__active";
+  const activeImg = document.createElement("img");
+  activeImg.alt = "Coffee shop photo";
+  activeImg.loading = "eager";
+  activeImg.src = placeUrls[activeIndex];
+  active.appendChild(activeImg);
+
+  const thumbs = document.createElement("div");
+  thumbs.className = "gallery__thumbs";
+
+  const thumbButtons = [];
+
+  const setActive = (idx) => {
+    activeIndex = idx;
+    activeImg.src = placeUrls[activeIndex];
+    for (let i = 0; i < thumbButtons.length; i++) {
+      thumbButtons[i].setAttribute("aria-current", i === activeIndex ? "true" : "false");
+    }
+  };
+
+  placeUrls.forEach((src, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "gallery__thumb";
+    btn.setAttribute("aria-current", idx === activeIndex ? "true" : "false");
+    btn.addEventListener("click", () => setActive(idx));
+
     const img = document.createElement("img");
-    img.alt = "Photo";
+    img.alt = "Thumbnail";
     img.loading = "lazy";
     img.src = src;
-    item.appendChild(img);
-    el.appendChild(item);
-  }
+    btn.appendChild(img);
+
+    thumbButtons.push(btn);
+    thumbs.appendChild(btn);
+  });
+
+  el.appendChild(active);
+  if (placeUrls.length > 1) el.appendChild(thumbs);
 }
 
 async function openShopDialog(place) {
@@ -201,6 +291,13 @@ async function openShopDialog(place) {
 
   try {
     const details = await fetchPlaceDetails(place.place_id);
+    if (details && details.location) {
+      const lat = details.location.latitude;
+      const lng = details.location.longitude;
+      if (Number.isFinite(lat) && Number.isFinite(lng) && pendingShop) {
+        pendingShop._latLng = { lat, lng };
+      }
+    }
     const latestState = loadState();
     const latestVisit = latestState.visitsByPlaceId[place.place_id] || null;
 
@@ -366,67 +463,22 @@ function renderPassport() {
     const body = document.createElement("div");
     body.className = "visit__body";
 
-    row.addEventListener("click", (e) => {
-      if (e.target === btnEdit || e.target === btnDelete) return;
-      const p = nearbyPlaces.find((x) => x.place_id === v.placeId) || {
-        place_id: v.placeId,
-        name: v.placeName,
-        vicinity: v.placeAddress,
-      };
-      openShopDialog(p);
-    });
-
     const title = document.createElement("div");
     title.style.fontWeight = "700";
     title.textContent = v.placeName || "Coffee shop";
 
-    const meta = document.createElement("div");
-    meta.className = "muted";
-    const date = v.visitedAt ? new Date(v.visitedAt) : null;
-    meta.textContent = [
-      v.rating ? `Rating: ${v.rating}★` : "Rating: –",
-      date && !Number.isNaN(date.valueOf()) ? date.toLocaleString() : null,
-      v.placeAddress || null,
-    ]
-      .filter(Boolean)
-      .join(" · ");
-
-    const actions = document.createElement("div");
-    actions.style.display = "flex";
-    actions.style.gap = "10px";
-    actions.style.marginTop = "6px";
-
-    const btnEdit = document.createElement("button");
-    btnEdit.className = "btn btn--ghost";
-    btnEdit.type = "button";
-    btnEdit.textContent = "Edit";
-    btnEdit.addEventListener("click", () => {
-      const p = nearbyPlaces.find((x) => x.place_id === v.placeId) || {
-        place_id: v.placeId,
-        name: v.placeName,
-        vicinity: v.placeAddress,
-      };
-      openVisitDialog(p);
-    });
-
-    const btnDelete = document.createElement("button");
-    btnDelete.className = "btn btn--danger";
-    btnDelete.type = "button";
-    btnDelete.textContent = "Delete";
-    btnDelete.addEventListener("click", () => {
-      const next = loadState();
-      delete next.visitsByPlaceId[v.placeId];
-      saveState(next);
-      renderPassport();
-      renderShops();
-    });
-
-    actions.appendChild(btnEdit);
-    actions.appendChild(btnDelete);
+    const stars = document.createElement("div");
+    stars.className = "stars stars--small";
+    const rating = v.rating && v.rating >= 1 && v.rating <= 5 ? v.rating : 0;
+    for (let i = 1; i <= 5; i++) {
+      const s = document.createElement("span");
+      s.className = `star star--small${i <= rating ? " isOn" : ""}`;
+      s.textContent = "★";
+      stars.appendChild(s);
+    }
 
     body.appendChild(title);
-    body.appendChild(meta);
-    body.appendChild(actions);
+    body.appendChild(stars);
 
     row.appendChild(photo);
     row.appendChild(body);
@@ -441,8 +493,23 @@ function openVisitDialog(place) {
 
   $("visitTitle").textContent = place.name || "Visit";
   $("rating").value = existing && existing.rating ? String(existing.rating) : "";
+  syncStarRatingUI();
   $("photo").value = "";
+  const photoName = $("photoName");
+  if (photoName) photoName.textContent = "No file selected";
   $("visitDialog").showModal();
+}
+
+function syncStarRatingUI() {
+  const valueRaw = $("rating").value;
+  const value = valueRaw ? Number(valueRaw) : 0;
+  const stars = document.querySelectorAll(".stars .star");
+  for (const el of stars) {
+    const v = Number(el.getAttribute("data-value"));
+    const on = Number.isFinite(v) && v <= value;
+    el.classList.toggle("isOn", on);
+    el.setAttribute("aria-checked", v === value ? "true" : "false");
+  }
 }
 
 function haversineMeters(a, b) {
@@ -638,9 +705,11 @@ async function fetchNearbyCoffee() {
           title: p.name,
         });
         marker.addListener("click", () => {
-          infoWindow.setContent(`<div style=\"font-weight:600\">${escapeHtml(p.name || "Coffee shop")}</div><div>${escapeHtml(
-            p.vicinity || ""
-          )}</div>`);
+          infoWindow.setContent(
+            `<div class=\"iw\"><div class=\"iw__title\">${escapeHtml(p.name || "Coffee shop")}</div><div class=\"iw__addr\">${escapeHtml(
+              p.vicinity || ""
+            )}</div></div>`
+          );
           infoWindow.open({ map, anchor: marker });
         });
         placeMarkers.push(marker);
@@ -657,42 +726,46 @@ async function fetchNearbyCoffee() {
 }
 
 async function bootstrap() {
-  $("btnSettings").addEventListener("click", openSettings);
-  $("btnPassport").addEventListener("click", togglePassport);
+  $("btnFind").addEventListener("click", () => setView("find"));
+  $("btnPassport").addEventListener("click", () => setView("passport"));
   $("btnRefresh").addEventListener("click", () => {
-    if (!getApiKey()) {
-      openSettings();
-      return;
-    }
     fetchNearbyCoffee();
   });
 
   $("btnShopVisit").addEventListener("click", () => {
     if (!pendingShop) return;
+    $("shopDialog").close();
     openVisitDialog(pendingShop);
   });
 
   $("btnShopShowOnMap").addEventListener("click", () => {
-    if (!pendingShop || !pendingShop.geometry || !pendingShop.geometry.location || !map) return;
+    if (!pendingShop || !map) return;
+    const pos = toLatLngLiteral(pendingShop);
+    if (!pos) return;
     $("shopDialog").close();
-    map.panTo(pendingShop.geometry.location);
-    map.setZoom(16);
-    infoWindow.setContent(`<div style=\"font-weight:600\">${escapeHtml(pendingShop.name || "Coffee shop")}</div><div>${escapeHtml(
-      pendingShop.vicinity || ""
-    )}</div>`);
-    infoWindow.setPosition(pendingShop.geometry.location);
-    infoWindow.open({ map });
+    setView("find");
+    const mapEl = $("map");
+    if (mapEl) {
+      mapEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    requestAnimationFrame(() => {
+      if (window.google && window.google.maps && window.google.maps.event) {
+        window.google.maps.event.trigger(map, "resize");
+      }
+      map.panTo(pos);
+      map.setZoom(16);
+      infoWindow.setContent(
+        `<div class=\"iw\"><div class=\"iw__title\">${escapeHtml(
+          pendingShop.name || "Coffee shop"
+        )}</div><div class=\"iw__addr\">${escapeHtml(pendingShop.vicinity || "")}</div></div>`
+      );
+      infoWindow.setPosition(pos);
+      infoWindow.open({ map });
+    });
   });
 
   $("btnExport").addEventListener("click", exportPassport);
   $("btnClear").addEventListener("click", clearPassport);
-
-  $("settingsForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    setApiKey($("apiKey").value);
-    $("settingsDialog").close();
-    start();
-  });
 
   $("visitForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -701,12 +774,30 @@ async function bootstrap() {
     if (pendingShop) {
       const st = loadState();
       const vis = pendingShop.place_id ? st.visitsByPlaceId[pendingShop.place_id] : null;
-      $("btnShopVisit").textContent = vis ? "Update visit" : "Visit";
-      renderShopGallery({ savedPhotoDataUrl: vis ? vis.photoDataUrl : null, placePhotos: [] });
+      if ($("shopDialog").open) {
+        $("btnShopVisit").textContent = vis ? "Update visit" : "Visit";
+        renderShopGallery({ savedPhotoDataUrl: vis ? vis.photoDataUrl : null, placePhotos: [] });
+      }
     }
   });
 
-  renderPassport();
+  const stars = document.querySelectorAll(".stars .star");
+  for (const el of stars) {
+    el.addEventListener("click", () => {
+      const v = Number(el.getAttribute("data-value"));
+      $("rating").value = Number.isFinite(v) ? String(v) : "";
+      syncStarRatingUI();
+    });
+  }
+
+  $("photo").addEventListener("change", () => {
+    const photoName = $("photoName");
+    if (!photoName) return;
+    const file = $("photo").files && $("photo").files[0] ? $("photo").files[0] : null;
+    photoName.textContent = file ? file.name : "No file selected";
+  });
+
+  setView("find");
 
   if (!navigator.geolocation) {
     setLocationStatus("Geolocation not available in this browser.");
@@ -729,7 +820,7 @@ async function bootstrap() {
 async function start() {
   const apiKey = getApiKey();
   if (!apiKey) {
-    setLocationStatus("Add your Google Maps API key in Settings.");
+    setLocationStatus("Missing Google Maps API key.");
     return;
   }
 
