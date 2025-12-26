@@ -75,7 +75,7 @@ function ensureGmapsLoaded(apiKey) {
     script.dataset.gmaps = "1";
     script.async = true;
     script.defer = true;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD5uOJLOyJjCU0hmOhIP08SrBEj7muK7Fc`;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Failed to load Google Maps."));
     document.head.appendChild(script);
