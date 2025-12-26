@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coffee Passport</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="topbar__title">Coffee Passport</div>
+        <div class="topbar__actions">
+          <button id="btnPassport" class="btn btn--ghost" type="button">Passport</button>
+          <button id="btnSettings" class="btn btn--ghost" type="button">Settings</button>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="section">
+          <div class="panel__header">
+            <div>
+              <h1 class="h1">Near you</h1>
+              <div id="locationStatus" class="muted">Getting your location…</div>
+            </div>
+            <div class="panel__headerActions">
+              <button id="btnRefresh" class="btn" type="button">Refresh</button>
+            </div>
+          </div>
+
+          <div class="grid">
+            <section class="panel" aria-label="Map">
+              <div class="panel__header">
+                <h2 class="h2">Map</h2>
+              </div>
+              <div id="map" class="map" aria-label="Map"></div>
+            </section>
+
+            <section class="panel" aria-label="Coffee shops">
+              <div class="panel__header">
+                <h2 class="h2">Coffee shops</h2>
+              </div>
+              <div id="shops" class="list" aria-live="polite"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel" id="passportPanel" hidden>
+          <div class="panel__header">
+            <div>
+              <h2 class="h2">Your passport</h2>
+              <div class="muted">Visited shops are saved on this device.</div>
+            </div>
+            <div class="panel__headerActions">
+              <button id="btnExport" class="btn btn--ghost" type="button">Export</button>
+              <button id="btnClear" class="btn btn--danger" type="button">Clear</button>
+            </div>
+          </div>
+          <div id="passport" class="passport"></div>
+        </section>
+      </main>
+
+      <dialog id="visitDialog" class="dialog">
+        <form method="dialog" class="dialog__form" id="visitForm">
+          <div class="dialog__header">
+            <div>
+              <div class="dialog__title" id="visitTitle">Visit</div>
+              <div class="muted" id="visitSub">Rate and add a photo.</div>
+            </div>
+            <button class="iconBtn" value="cancel" aria-label="Close" type="submit">✕</button>
+          </div>
+
+          <div class="field">
+            <label class="label" for="rating">Rating</label>
+            <select id="rating" class="input">
+              <option value="">Select…</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="label" for="photo">Photo</label>
+            <input id="photo" class="input" type="file" accept="image/*" capture="environment" />
+            <div id="photoHint" class="muted">Optional. Stored locally.</div>
+          </div>
+
+          <div class="dialog__actions">
+            <button class="btn btn--ghost" value="cancel" type="submit">Cancel</button>
+            <button id="btnSaveVisit" class="btn" value="default" type="submit">Save visit</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="settingsDialog" class="dialog">
+        <form method="dialog" class="dialog__form" id="settingsForm">
+          <div class="dialog__header">
+            <div>
+              <div class="dialog__title">Settings</div>
+              <div class="muted">Google Maps API key is stored only in your browser.</div>
+            </div>
+            <button class="iconBtn" value="cancel" aria-label="Close" type="submit">✕</button>
+          </div>
+
+          <div class="field">
+            <label class="label" for="apiKey">Google Maps API key</label>
+            <input id="apiKey" class="input" type="password" placeholder="Paste your API key" autocomplete="off" />
+            <div class="muted">Needs Maps JavaScript API + Places API enabled for this key.</div>
+          </div>
+
+          <div class="dialog__actions">
+            <button class="btn btn--ghost" value="cancel" type="submit">Cancel</button>
+            <button id="btnSaveKey" class="btn" value="default" type="submit">Save</button>
+          </div>
+        </form>
+      </dialog>
+
+      <dialog id="shopDialog" class="dialog">
+        <form method="dialog" class="dialog__form" id="shopForm">
+          <div class="dialog__header">
+            <div>
+              <div class="dialog__title" id="shopTitle">Coffee shop</div>
+              <div class="muted" id="shopAddress"></div>
+            </div>
+            <button class="iconBtn" value="cancel" aria-label="Close" type="submit">✕</button>
+          </div>
+
+          <div class="gallery" id="shopGallery" aria-live="polite"></div>
+
+          <div class="dialog__actions">
+            <button id="btnShopShowOnMap" class="btn btn--ghost" value="cancel" type="button">Show on map</button>
+            <button id="btnShopVisit" class="btn" value="default" type="button">Visit</button>
+          </div>
+        </form>
+      </dialog>
+
+      <footer class="footer">
+        <div class="muted">Local-only. No accounts. No server.</div>
+      </footer>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
