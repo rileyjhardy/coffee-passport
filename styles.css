@@ -38,6 +38,7 @@ body {
   background: radial-gradient(1200px 600px at 20% 0%, rgba(168, 85, 247, 0.15), transparent 60%),
     radial-gradient(900px 500px at 90% 10%, rgba(236, 72, 153, 0.12), transparent 50%),
     radial-gradient(700px 400px at 50% 100%, rgba(249, 115, 22, 0.08), transparent 50%), var(--bg);
+  background-attachment: fixed;
   color: var(--text);
 }
 
@@ -57,6 +58,7 @@ body {
   position: sticky;
   top: 0;
   background: rgba(11, 11, 15, 0.6);
+  z-index: 1000;
 }
 
 .topbar__title {
@@ -235,6 +237,11 @@ body {
 .btn--danger {
   border-color: rgba(239, 68, 68, 0.6);
   background: rgba(239, 68, 68, 0.1);
+}
+
+.btn--small {
+  padding: 6px 10px;
+  font-size: 12px;
 }
 
 .iconBtn {
@@ -464,8 +471,9 @@ body {
   border-radius: var(--radiusSm);
   overflow: hidden;
   display: grid;
-  grid-template-columns: 140px 1fr;
+  grid-template-columns: 140px 1fr auto;
   min-height: 110px;
+  align-items: center;
 }
 
 @media (max-width: 700px) {
@@ -490,6 +498,16 @@ body {
   padding: 12px;
   display: grid;
   gap: 6px;
+}
+
+.visit__date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.visit > .btn {
+  margin: 12px;
+  align-self: center;
 }
 
 .gm-style,
@@ -613,24 +631,34 @@ body {
 .btnAskRiley {
   appearance: none;
   border: 2px solid transparent;
-  background: linear-gradient(135deg, var(--funPurple), var(--funPink));
-  color: white;
+  background: transparent;
+  background-image: linear-gradient(rgba(17, 24, 39, 1), rgba(17, 24, 39, 1)), 
+                    linear-gradient(135deg, var(--funPurple), var(--funPink), var(--funOrange));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  color: var(--text);
   border-radius: 999px;
   padding: 8px 14px;
   cursor: pointer;
   font-weight: 700;
   font-size: 13px;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
 }
 
 .btnAskRiley:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(168, 85, 247, 0.4);
+  background-image: linear-gradient(rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 0.8)), 
+                    linear-gradient(135deg, var(--funPurple), var(--funPink), var(--funOrange));
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
 }
 
 .btnAskRiley:active {
   transform: translateY(0);
+}
+
+.btnAskRiley--fullWidth {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
 }
 
 .confetti {
@@ -638,9 +666,10 @@ body {
   width: 10px;
   height: 10px;
   background: var(--funPink);
-  position: absolute;
   animation: confetti-fall 3s linear forwards;
   pointer-events: none;
+  z-index: 2147483647;
+  top: -20px;
 }
 
 @keyframes confetti-fall {
@@ -657,4 +686,73 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.dialog--welcome {
+  max-width: 600px;
+}
+
+.welcome {
+  display: grid;
+  gap: 24px;
+}
+
+.welcome__photo {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--funPurple);
+  margin: 0 auto;
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.4);
+}
+
+.welcome__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.welcome__content {
+  display: grid;
+  gap: 16px;
+  text-align: center;
+}
+
+.welcome__title {
+  font-size: 24px;
+  margin: 0;
+  background: linear-gradient(135deg, var(--funPurple), var(--funPink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome__message {
+  display: grid;
+  gap: 12px;
+  line-height: 1.6;
+}
+
+.welcome__message p {
+  margin: 0;
+}
+
+.welcome__list {
+  text-align: left;
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.welcome__list li {
+  line-height: 1.6;
+}
+
+.welcome .btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  margin-top: 8px;
 }

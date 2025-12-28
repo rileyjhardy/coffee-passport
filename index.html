@@ -30,16 +30,10 @@
 
           <div class="grid">
             <section class="panel" aria-label="Map">
-              <div class="panel__header">
-                <h2 class="h2">Map</h2>
-              </div>
               <div id="map" class="map" aria-label="Map"></div>
             </section>
 
             <section class="panel" aria-label="Nearby">
-              <div class="panel__header">
-                <h2 class="h2">Nearby</h2>
-              </div>
               <div id="shops" class="list" aria-live="polite"></div>
             </section>
           </div>
@@ -129,6 +123,34 @@
           </div>
           
           <div id="rileyVerdictContainer"></div>
+        </form>
+      </dialog>
+
+      <dialog id="welcomeDialog" class="dialog dialog--welcome">
+        <form method="dialog" class="dialog__form">
+          <div class="welcome">
+            <div class="welcome__photo">
+              <img src="./riley-photos/happy.jpg" alt="Riley" />
+            </div>
+            
+            <div class="welcome__content">
+              <h2 class="welcome__title">Welcome to Your Coffee Passport! ☕</h2>
+              
+              <div class="welcome__message">
+                <p>I know how much you love your coffee. I built this app for you so you can find new coffee spots and get my super important opinion on them.</p>
+                
+                <p>Here's what you can do:</p>
+                <ul class="welcome__list">
+                  <li>Find nearby coffee shops</li>
+                  <li>Ask me, your favorite brother, for chaotic advice</li>
+                  <li>Rate and save your favorite visits</li>
+                  <li>Build your coffee passport</li>
+                </ul>
+              </div>
+              
+              <button class="btn" type="submit" value="default">I'm thirsty</button>
+            </div>
+          </div>
         </form>
       </dialog>
     </div>

@@ -1,4 +1,5 @@
 const STORAGE_KEY = "coffee_passport_v1";
+const WELCOME_SHOWN_KEY = "coffee_passport_welcome_shown";
 const GOOGLE_MAPS_API_KEY = "AIzaSyD5uOJLOyJjCU0hmOhIP08SrBEj7muK7Fc";
 
 function $(id) {
@@ -394,14 +395,15 @@ function renderShops() {
       badges.appendChild(b);
     }
 
-    const btnVisit = document.createElement("button");
-    btnVisit.className = "btn";
-    btnVisit.type = "button";
-    btnVisit.textContent = visit ? "Update visit" : "Visit";
-    btnVisit.addEventListener("click", () => openVisitDialog(p));
+    right.appendChild(badges);
+
+    top.appendChild(left);
+    top.appendChild(right);
+
+    el.appendChild(top);
 
     const btnRiley = document.createElement("button");
-    btnRiley.className = "btnAskRiley";
+    btnRiley.className = "btnAskRiley btnAskRiley--fullWidth";
     btnRiley.type = "button";
     btnRiley.textContent = "Ask Riley";
     btnRiley.addEventListener("click", (e) => {
@@ -409,17 +411,10 @@ function renderShops() {
       showRileyVerdict(p);
     });
 
-    right.appendChild(badges);
-    right.appendChild(btnVisit);
-    right.appendChild(btnRiley);
-
-    top.appendChild(left);
-    top.appendChild(right);
-
-    el.appendChild(top);
+    el.appendChild(btnRiley);
 
     el.addEventListener("click", (e) => {
-      if (e.target === btnVisit || e.target === btnRiley) return;
+      if (e.target === btnRiley) return;
       openShopDialog(p);
     });
 
@@ -440,20 +435,21 @@ function getRileyVerdict() {
   const verdicts = [
     { type: "positive", photo: "happy", messages: [
       "Absolutely! The vibes are immaculate ☕",
-      "5-star potential, trust me on this one 🌟",
+      "5-star potential, trust me on this one",
       "This place is chef's kiss 👨‍🍳💋",
       "You'd be crazy NOT to go here! 🔥",
-      "This is THE spot, no question ✨",
-      "I'm getting major cozy energy from this place 🛋️",
-      "10/10 would recommend, my coffee senses are tingling ☕",
-      "This place just FEELS right, ya know? 💯"
+      "This is THE spot, no question",
+      "This one is so cozy, I took a nap here once",
+      "10/10 would recommend, super cute barista's",
+      "This place just FEELS right, ya know?"
     ]},
     { type: "negative", photo: "sad", messages: [
-      "Ehh, skip this one unless you're desperate 😬",
-      "I mean... if you REALLY want to... but why? 🤷",
-      "Not feeling it tbh 😕",
-      "There are better options nearby, I promise 📍",
-      "My gut says pass on this one 🙅",
+      "Ehh, skip this one unless you're desperate",
+      "I mean... if you REALLY want to... but why?",
+      "Not feeling it tbh",
+      "Why Charlie Brown?... Why?",
+      "There are better options nearby",
+      "This one just makes me upset",
       "Meh energy detected 😑",
       "I've got a bad feeling about this one..."
     ]}
@@ -471,14 +467,14 @@ function getRileyVerdict() {
 
 function getThinkingMessage() {
   const messages = [
-    "Consulting the coffee gods...",
+    "Consulting God...",
     "Analyzing vibes...",
     "Checking my gut feeling...",
     "Doing some serious thinking here...",
     "Hmm, let me ponder this...",
     "Tapping into my coffee expertise...",
     "Reading the tea leaves (jk it's coffee)...",
-    "Computing the vibe check..."
+    "Simmering on this..."
   ];
   return messages[Math.floor(Math.random() * messages.length)];
 }
@@ -629,11 +625,38 @@ function renderPassport() {
       stars.appendChild(s);
     }
 
+    const dateEl = document.createElement("div");
+    dateEl.className = "visit__date";
+    if (v.visitedAt) {
+      const date = new Date(v.visitedAt);
+      dateEl.textContent = date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+    }
+
     body.appendChild(title);
     body.appendChild(stars);
+    body.appendChild(dateEl);
+
+    const btnUpdate = document.createElement("button");
+    btnUpdate.className = "btn btn--small";
+    btnUpdate.type = "button";
+    btnUpdate.textContent = "Update";
+    btnUpdate.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const fakePlace = {
+        place_id: v.placeId,
+        name: v.placeName,
+        vicinity: v.placeAddress
+      };
+      openVisitDialog(fakePlace);
+    });
 
     row.appendChild(photo);
     row.appendChild(body);
+    row.appendChild(btnUpdate);
     container.appendChild(row);
   }
 }
@@ -844,10 +867,10 @@ async function fetchNearbyCoffee() {
 
     $("btnRefresh").disabled = false;
     const funMessages = [
-      `Found ${nearbyPlaces.length} coffee spots! Let's explore! 🎉`,
-      `${nearbyPlaces.length} cafes discovered! Time to caffeinate! ☕`,
-      `${nearbyPlaces.length} coffee shops nearby - the adventure begins! 🗺️`,
-      `Woohoo! ${nearbyPlaces.length} places to get your coffee fix! 🎊`
+      `Found ${nearbyPlaces.length} coffee spots!`,
+      `${nearbyPlaces.length} cafes discovered!`,
+      `${nearbyPlaces.length} coffee shops nearby!`,
+      `Woohoo! ${nearbyPlaces.length} places!`
     ];
     setLocationStatus(funMessages[Math.floor(Math.random() * funMessages.length)]);
     renderShops();
@@ -887,7 +910,21 @@ async function fetchNearbyCoffee() {
   }
 }
 
+function showWelcomeIfFirstTime() {
+  const hasSeenWelcome = localStorage.getItem(WELCOME_SHOWN_KEY);
+  
+  if (!hasSeenWelcome) {
+    const welcomeDialog = $("welcomeDialog");
+    if (welcomeDialog) {
+      welcomeDialog.showModal();
+      localStorage.setItem(WELCOME_SHOWN_KEY, "true");
+    }
+  }
+}
+
 async function bootstrap() {
+  showWelcomeIfFirstTime();
+  
   $("btnFind").addEventListener("click", () => setView("find"));
   $("btnPassport").addEventListener("click", () => setView("passport"));
   $("btnRefresh").addEventListener("click", () => {
