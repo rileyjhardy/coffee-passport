@@ -1,0 +1,10 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sadGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fb923c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#sadGrad)"/>
+  <text x="100" y="130" font-size="80" text-anchor="middle" fill="white">😢</text>
+</svg>

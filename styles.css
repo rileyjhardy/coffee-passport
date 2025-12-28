@@ -11,6 +11,11 @@
   --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
   --radius: 16px;
   --radiusSm: 12px;
+  --funPurple: #a855f7;
+  --funPink: #ec4899;
+  --funOrange: #f97316;
+  --funGreen: #10b981;
+  --funYellow: #fbbf24;
 }
 
 * {
@@ -30,8 +35,9 @@ body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
     "Segoe UI Emoji";
-  background: radial-gradient(1200px 600px at 20% 0%, rgba(var(--accentRgb), 0.12), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(99, 102, 241, 0.1), transparent 50%), var(--bg);
+  background: radial-gradient(1200px 600px at 20% 0%, rgba(168, 85, 247, 0.15), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(236, 72, 153, 0.12), transparent 50%),
+    radial-gradient(700px 400px at 50% 100%, rgba(249, 115, 22, 0.08), transparent 50%), var(--bg);
   color: var(--text);
 }
 
@@ -530,4 +536,125 @@ body {
   padding: 16px 18px;
   border-top: 1px solid var(--border);
   text-align: center;
+}
+
+.rileyVerdict {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radiusSm);
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  display: grid;
+  gap: 10px;
+}
+
+.rileyVerdict__content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  text-align: center;
+}
+
+.rileyVerdict__photo {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--border);
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.rileyVerdict__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rileyVerdict__photo--thinking {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.rileyVerdict__text {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+}
+
+.rileyVerdict__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.rileyVerdict__message {
+  font-size: 18px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.rileyVerdict--positive .rileyVerdict__message {
+  color: var(--funGreen);
+}
+
+.rileyVerdict--negative .rileyVerdict__message {
+  color: var(--funOrange);
+}
+
+.btnAskRiley {
+  appearance: none;
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, var(--funPurple), var(--funPink));
+  color: white;
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.btnAskRiley:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(168, 85, 247, 0.4);
+}
+
+.btnAskRiley:active {
+  transform: translateY(0);
+}
+
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: var(--funPink);
+  position: absolute;
+  animation: confetti-fall 3s linear forwards;
+  pointer-events: none;
+}
+
+@keyframes confetti-fall {
+  to {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.topbar__title {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: linear-gradient(135deg, var(--funPurple), var(--funPink), var(--funOrange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

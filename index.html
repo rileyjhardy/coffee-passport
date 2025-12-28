@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Coffee Passport</title>
+    <title>☕ Coffee Passport</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="app">
       <header class="topbar">
-        <div class="topbar__title">Coffee Passport</div>
+        <div class="topbar__title">☕ Coffee Passport</div>
         <div class="topbar__actions">
           <button id="btnFind" class="btn btn--ghost" type="button">Find</button>
           <button id="btnPassport" class="btn btn--ghost" type="button">Passport</button>
@@ -112,9 +112,23 @@
           <div class="gallery" id="shopGallery" aria-live="polite"></div>
 
           <div class="dialog__actions">
+            <button id="btnShopAskRiley" class="btnAskRiley" type="button">Ask Riley</button>
             <button id="btnShopShowOnMap" class="btn btn--ghost" value="cancel" type="button">Show on map</button>
             <button id="btnShopVisit" class="btn" value="default" type="button">Visit</button>
           </div>
+        </form>
+      </dialog>
+
+      <dialog id="rileyDialog" class="dialog">
+        <form method="dialog" class="dialog__form">
+          <div class="dialog__header">
+            <div>
+              <div class="dialog__title">Riley's Verdict</div>
+            </div>
+            <button class="iconBtn" value="cancel" aria-label="Close" type="submit">✕</button>
+          </div>
+          
+          <div id="rileyVerdictContainer"></div>
         </form>
       </dialog>
     </div>
