@@ -510,6 +510,23 @@ body {
   align-self: center;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px 0;
+  margin-top: 8px;
+}
+
+.pagination__info {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 100px;
+  text-align: center;
+}
+
 .gm-style,
 .gm-style * {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
@@ -686,6 +703,12 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.topbar__title:hover {
+  opacity: 0.8;
 }
 
 .dialog--welcome {

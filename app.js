@@ -1,6 +1,11 @@
 const STORAGE_KEY = "coffee_passport_v1";
 const WELCOME_SHOWN_KEY = "coffee_passport_welcome_shown";
 const GOOGLE_MAPS_API_KEY = "AIzaSyD5uOJLOyJjCU0hmOhIP08SrBEj7muK7Fc";
+const SHOPS_PER_PAGE = 8;
+const PASSPORT_PER_PAGE = 8;
+
+let currentShopPage = 1;
+let currentPassportPage = 1;
 
 function $(id) {
   return document.getElementById(id);
@@ -335,7 +340,15 @@ function renderShops() {
     return;
   }
 
-  for (const p of nearbyPlaces) {
+  const totalPages = Math.ceil(nearbyPlaces.length / SHOPS_PER_PAGE);
+  if (currentShopPage > totalPages) currentShopPage = totalPages;
+  if (currentShopPage < 1) currentShopPage = 1;
+
+  const startIndex = (currentShopPage - 1) * SHOPS_PER_PAGE;
+  const endIndex = startIndex + SHOPS_PER_PAGE;
+  const shopsToShow = nearbyPlaces.slice(startIndex, endIndex);
+
+  for (const p of shopsToShow) {
     const visit = state.visitsByPlaceId[p.place_id];
 
     const el = document.createElement("div");
@@ -420,6 +433,42 @@ function renderShops() {
 
     container.appendChild(el);
   }
+
+  if (totalPages > 1) {
+    const pagination = document.createElement("div");
+    pagination.className = "pagination";
+
+    const prevBtn = document.createElement("button");
+    prevBtn.className = "btn btn--ghost";
+    prevBtn.textContent = "← Previous";
+    prevBtn.disabled = currentShopPage === 1;
+    prevBtn.addEventListener("click", () => {
+      if (currentShopPage > 1) {
+        currentShopPage--;
+        renderShops();
+      }
+    });
+
+    const pageInfo = document.createElement("span");
+    pageInfo.className = "pagination__info";
+    pageInfo.textContent = `Page ${currentShopPage} of ${totalPages}`;
+
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "btn btn--ghost";
+    nextBtn.textContent = "Next →";
+    nextBtn.disabled = currentShopPage === totalPages;
+    nextBtn.addEventListener("click", () => {
+      if (currentShopPage < totalPages) {
+        currentShopPage++;
+        renderShops();
+      }
+    });
+
+    pagination.appendChild(prevBtn);
+    pagination.appendChild(pageInfo);
+    pagination.appendChild(nextBtn);
+    container.appendChild(pagination);
+  }
 }
 
 function escapeHtml(s) {
@@ -434,24 +483,24 @@ function escapeHtml(s) {
 function getRileyVerdict() {
   const verdicts = [
     { type: "positive", photo: "happy", messages: [
-      "Absolutely! The vibes are immaculate ☕",
-      "5-star potential, trust me on this one",
-      "This place is chef's kiss 👨‍🍳💋",
-      "You'd be crazy NOT to go here! 🔥",
-      "This is THE spot, no question",
-      "This one is so cozy, I took a nap here once",
+      "Absolutely! The vibes are immaculate",
+      "Basically Pour Jon's",
+      "This place is chef's kiss",
+      "They have a Super Cool Mocha with mint!",
+      "this is THE spot, no question",
+      "this one is so cozy, I took a nap here once",
       "10/10 would recommend, super cute barista's",
-      "This place just FEELS right, ya know?"
+      "this place just FEELS right, ya know?"
     ]},
     { type: "negative", photo: "sad", messages: [
-      "Ehh, skip this one unless you're desperate",
-      "I mean... if you REALLY want to... but why?",
-      "Not feeling it tbh",
-      "Why Charlie Brown?... Why?",
-      "There are better options nearby",
-      "This one just makes me upset",
-      "Meh energy detected 😑",
-      "I've got a bad feeling about this one..."
+      "ehh, skip this one unless you're desperate",
+      "i mean... if you REALLY want to... but why?",
+      "if the Exorcist was a coffee shop...",
+      "why Charlie Brown?... Why?",
+      "there are better options nearby",
+      "this one just makes me upset",
+      "meh",
+      "remember that goat meat/cheese bowl you ate? This place is like that"
     ]}
   ];
 
@@ -467,14 +516,14 @@ function getRileyVerdict() {
 
 function getThinkingMessage() {
   const messages = [
-    "Consulting God...",
-    "Analyzing vibes...",
-    "Checking my gut feeling...",
-    "Doing some serious thinking here...",
-    "Hmm, let me ponder this...",
-    "Tapping into my coffee expertise...",
-    "Reading the tea leaves (jk it's coffee)...",
-    "Simmering on this..."
+    "consulting God...",
+    "analyzing vibes...",
+    "checking my gut feeling...",
+    "doing some serious thinking here...",
+    "hmm, let me ponder this...",
+    "tapping into my coffee expertise...",
+    "reading the tea leaves (jk it's coffee)...",
+    "simmering on this..."
   ];
   return messages[Math.floor(Math.random() * messages.length)];
 }
@@ -589,7 +638,15 @@ function renderPassport() {
     return;
   }
 
-  for (const v of visits) {
+  const totalPages = Math.ceil(visits.length / PASSPORT_PER_PAGE);
+  if (currentPassportPage > totalPages) currentPassportPage = totalPages;
+  if (currentPassportPage < 1) currentPassportPage = 1;
+
+  const startIndex = (currentPassportPage - 1) * PASSPORT_PER_PAGE;
+  const endIndex = startIndex + PASSPORT_PER_PAGE;
+  const visitsToShow = visits.slice(startIndex, endIndex);
+
+  for (const v of visitsToShow) {
     const row = document.createElement("div");
     row.className = "visit";
 
@@ -658,6 +715,42 @@ function renderPassport() {
     row.appendChild(body);
     row.appendChild(btnUpdate);
     container.appendChild(row);
+  }
+
+  if (totalPages > 1) {
+    const pagination = document.createElement("div");
+    pagination.className = "pagination";
+
+    const prevBtn = document.createElement("button");
+    prevBtn.className = "btn btn--ghost";
+    prevBtn.textContent = "← Previous";
+    prevBtn.disabled = currentPassportPage === 1;
+    prevBtn.addEventListener("click", () => {
+      if (currentPassportPage > 1) {
+        currentPassportPage--;
+        renderPassport();
+      }
+    });
+
+    const pageInfo = document.createElement("span");
+    pageInfo.className = "pagination__info";
+    pageInfo.textContent = `Page ${currentPassportPage} of ${totalPages}`;
+
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "btn btn--ghost";
+    nextBtn.textContent = "Next →";
+    nextBtn.disabled = currentPassportPage === totalPages;
+    nextBtn.addEventListener("click", () => {
+      if (currentPassportPage < totalPages) {
+        currentPassportPage++;
+        renderPassport();
+      }
+    });
+
+    pagination.appendChild(prevBtn);
+    pagination.appendChild(pageInfo);
+    pagination.appendChild(nextBtn);
+    container.appendChild(pagination);
   }
 }
 
@@ -794,7 +887,12 @@ function clearPlaceMarkers() {
   placeMarkers = [];
 }
 
+function resetShopPagination() {
+  currentShopPage = 1;
+}
+
 async function fetchNearbyCoffee() {
+  resetShopPagination();
   if (!currentPosition) return;
   const apiKey = getApiKey();
   if (!apiKey) return;
@@ -924,6 +1022,13 @@ function showWelcomeIfFirstTime() {
 
 async function bootstrap() {
   showWelcomeIfFirstTime();
+  
+  $("appTitle").addEventListener("click", () => {
+    const welcomeDialog = $("welcomeDialog");
+    if (welcomeDialog) {
+      welcomeDialog.showModal();
+    }
+  });
   
   $("btnFind").addEventListener("click", () => setView("find"));
   $("btnPassport").addEventListener("click", () => setView("passport"));
