@@ -483,24 +483,24 @@ function escapeHtml(s) {
 function getRileyVerdict() {
   const verdicts = [
     { type: "positive", photo: "happy", messages: [
-      "Absolutely! The vibes are immaculate",
-      "Basically Pour Jon's",
-      "This place is chef's kiss",
-      "They have a Super Cool Mocha with mint!",
-      "this is THE spot, no question",
+      "i can be there in 5 min, just lmk",
+      "basically Pour Jon's",
+      "they have a super cool mocha with mint!",
       "this one is so cozy, I took a nap here once",
       "10/10 would recommend, super cute barista's",
-      "this place just FEELS right, ya know?"
+      "this place just feels right, ya know?",
+      "i wanted to buy this place, but i couldn't afford it"
     ]},
     { type: "negative", photo: "sad", messages: [
-      "ehh, skip this one unless you're desperate",
+      "ehh, skip unless you're desperate",
       "i mean... if you REALLY want to... but why?",
-      "if the Exorcist was a coffee shop...",
+      "if the Exorcist was a coffee shop",
       "why Charlie Brown?... Why?",
-      "there are better options nearby",
+      "they kicked me out, so no",
       "this one just makes me upset",
       "meh",
-      "remember that goat meat/cheese bowl you ate? This place is like that"
+      "remember that goat meat/cheese bowl you ate? This place is like that",
+      "trash late art, trash coffee"
     ]}
   ];
 
