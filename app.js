@@ -893,12 +893,37 @@ function resetShopPagination() {
 
 async function fetchNearbyCoffee() {
   resetShopPagination();
-  if (!currentPosition) return;
   const apiKey = getApiKey();
   if (!apiKey) return;
 
-  setLocationStatus("Hunting for the best coffee vibes... ☕🔍");
+  setLocationStatus("Getting your location... 📍");
   $("btnRefresh").disabled = true;
+
+  try {
+    // Re-capture current location
+    const pos = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 12000,
+      });
+    });
+
+    currentPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+
+    // Re-center map on new position
+    if (map) {
+      map.setCenter(currentPosition);
+      map.setZoom(14);
+    }
+
+    setLocationStatus("Hunting for the best coffee vibes... ☕🔍");
+  } catch (error) {
+    setLocationStatus("Couldn't get location. Using last known position.");
+    if (!currentPosition) {
+      $("btnRefresh").disabled = false;
+      return;
+    }
+  }
 
   try {
     const radiusMeters = 2500;
